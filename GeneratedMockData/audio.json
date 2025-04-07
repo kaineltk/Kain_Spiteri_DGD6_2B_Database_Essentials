@@ -1,51 +1,41 @@
 [
   {
-    "audio_id": "audio_001",
     "filename": "main_theme.mp3",
     "file_id": "gridfs11"
   },
   {
-    "audio_id": "audio_002",
     "filename": "battle_theme.mp3",
     "file_id": "gridfs12"
   },
   {
-    "audio_id": "audio_003",
     "filename": "victory_jingle.mp3",
     "file_id": "gridfs13"
   },
   {
-    "audio_id": "audio_004",
     "filename": "loss_theme.mp3",
     "file_id": "gridfs14"
   },
   {
-    "audio_id": "audio_005",
     "filename": "menu_click.wav",
     "file_id": "gridfs15"
   },
   {
-    "audio_id": "audio_006",
     "filename": "jump.wav",
     "file_id": "gridfs16"
   },
   {
-    "audio_id": "audio_007",
     "filename": "coin_collect.wav",
     "file_id": "gridfs17"
   },
   {
-    "audio_id": "audio_008",
     "filename": "door_open.wav",
     "file_id": "gridfs18"
   },
   {
-    "audio_id": "audio_009",
     "filename": "explosion.wav",
     "file_id": "gridfs19"
   },
   {
-    "audio_id": "audio_010",
     "filename": "ambient_forest.mp3",
     "file_id": "gridfs20"
   }

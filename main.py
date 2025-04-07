@@ -1,8 +1,9 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from pydantic import BaseModel
-import motor.motor_asyncio
+from motor.motor_asyncio import AsyncIOMotorClient
 import os
 from dotenv import load_dotenv
+from bson import ObjectId
 import gridfs
 
 # Load environment variables from .env file
@@ -13,17 +14,17 @@ app = FastAPI()
 # Connect to Mongo Atlas
 CONNECTION_STRING = os.getenv('CONNECTION_STRING')
 
-client = motor.motor_asyncio.AsyncIOMotorClient(CONNECTION_STRING)
+client = AsyncIOMotorClient(CONNECTION_STRING)
 db = client.DB_PlayerData  
-
-
-#fs = gridfs.GridFS(db)  # Create GridFS instance for this database
+#fs = gridfs.GridFSBucket(db)  # Create GridFS instance for this database
 
 class PlayerScore(BaseModel):
     player_name: str
     score: int
 
     
+
+
 @app.post("/upload_sprite")
 async def upload_sprite(file: UploadFile = File(...)):
 
@@ -34,12 +35,63 @@ async def upload_sprite(file: UploadFile = File(...)):
  return {"message": "Sprite uploaded", "id": str(result.inserted_id)}
 
 
+#Get Audio
+@app.get("/sprite/{sprite_id}")
+async def get_sprite(_id: str):
+    result = await db.sprites.find_one({"_id": ObjectId(_id)})
+
+    if result:
+        result["_id"] = str(result["_id"]) #Convert ObjectId to string
+        return result 
+    else:
+        raise HTTPException(status_code=404, detail="Sprite not found")
+    
+
+#Get All Sprites
+@app.get("/all_sprites")
+async def get_all_sprites():
+    savedSprites = await db.sprites.find().to_list(length=100)
+    allSprites = []
+
+    for sprite in savedSprites:
+        sprite["_id"] = str(sprite["_id"]) #Convert ObjectId to string
+        allSprites.append(audio)
+
+    return {"all_audio": allSprites}
+
+
+#TODO: THIS
 @app.post("/upload_audio")
 async def upload_audio(file: UploadFile = File(...)):
- content = await file.read()
- audio_doc = {"filename": file.filename, "content": content}
- result = await db.audio.insert_one(audio_doc)
- return {"message": "Audio file uploaded", "id": str(result.inserted_id)}
+    content = await file.read()
+    audio_doc = {"filename": file.filename, "content": content}
+    result = await db.audio.insert_one(audio_doc)
+    return {"message": "Audio file uploaded", "id": str(result.inserted_id)}
+
+#Get Audio
+@app.get("/audio/{audio_id}")
+async def get_audio(_id: str):
+    result = await db.audio.find_one({"_id": ObjectId(_id)})
+
+    if result:
+        result["_id"] = str(result["_id"]) #Convert ObjectId to string
+        return result 
+    else:
+        raise HTTPException(status_code=404, detail="Audio not found")
+    
+
+#Get All Audio
+@app.get("/all_audio")
+async def get_all_audio():
+    savedAudio = await db.audio.find().to_list(length=100)
+    allAudio = []
+
+    for audio in savedAudio:
+        audio["_id"] = str(audio["_id"]) #Convert ObjectId to string
+        allAudio.append(audio)
+
+    return {"all_audio": allAudio}
+
 
 #Add Player Score
 @app.post("/player_score")

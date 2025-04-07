@@ -1,51 +1,41 @@
 [
   {
-    "sprite_id": "sprite_001",
     "filename": "hero_walk.png",
     "file_id": "gridfs1"
   },
   {
-    "sprite_id": "sprite_002",
     "filename": "enemy_fly.png",
     "file_id": "gridfs2"
   },
   {
-    "sprite_id": "sprite_003",
     "filename": "platform_tile.png",
     "file_id": "gridfs3"
   },
   {
-    "sprite_id": "sprite_004",
     "filename": "boss_roar.png",
     "file_id": "gridfs4"
   },
   {
-    "sprite_id": "sprite_005",
     "filename": "coin_spin.png",
     "file_id": "gridfs5"
   },
   {
-    "sprite_id": "sprite_006",
     "filename": "door_open.png",
     "file_id": "gridfs6"
   },
   {
-    "sprite_id": "sprite_007",
     "filename": "trap_spike.png",
     "file_id": "gridfs7"
   },
   {
-    "sprite_id": "sprite_008",
     "filename": "fireball_cast.png",
     "file_id": "gridfs8"
   },
   {
-    "sprite_id": "sprite_009",
     "filename": "shield_block.png",
     "file_id": "gridfs9"
   },
   {
-    "sprite_id": "sprite_010",
     "filename": "npc_villager.png",
     "file_id": "gridfs10"
   }
