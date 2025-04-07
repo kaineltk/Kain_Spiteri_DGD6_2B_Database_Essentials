@@ -1,12 +1,20 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from pydantic import BaseModel
 import motor.motor_asyncio
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = FastAPI()
 
 # Connect to Mongo Atlas
-client = motor.motor_asyncio.AsyncIOMotorClient("your_mongo_connection_string")
+CONNECTION_STRING = os.getenv('CONNECTION_STRING')
+
+client = motor.motor_asyncio.AsyncIOMotorClient(CONNECTION_STRING)
 db = client.multimedia_db
+fs = GridFS(db)  # Create GridFS instance for this database
 
 class PlayerScore(BaseModel):
  player_name: str
