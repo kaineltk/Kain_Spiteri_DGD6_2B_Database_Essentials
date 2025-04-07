@@ -1,3 +1,6 @@
+use DB_PlayerData
+
+
 db.sprites.insertMany([
   { "sprite_id": "sprite_001", "filename": "hero_walk.png", "file_id": "gridfs1" },
   { "sprite_id": "sprite_002", "filename": "enemy_fly.png", "file_id": "gridfs2" },
@@ -25,19 +28,24 @@ db.audio.insertMany([
 ])
 
 db.scores.insertMany([
-  { "player_id": "player_001", "score": 1500 },
-  { "player_id": "player_002", "score": 2450 },
-  { "player_id": "player_003", "score": 3200 },
-  { "player_id": "player_001", "score": 2100 },
-  { "player_id": "player_004", "score": 1200 },
-  { "player_id": "player_002", "score": 4000 },
-  { "player_id": "player_005", "score": 900 },
-  { "player_id": "player_006", "score": 1980 },
-  { "player_id": "player_007", "score": 3700 },
-  { "player_id": "player_003", "score": 1600 }
+  { "player_name": "player_001", "score": 1500 },
+  { "player_name": "player_002", "score": 2450 },
+  { "player_name": "player_003", "score": 3200 },
+  { "player_name": "player_004", "score": 2100 },
+  { "player_name": "player_005", "score": 1200 },
+  { "player_name": "player_006", "score": 4000 },
+  { "player_name": "player_007", "score": 900 },
+  { "player_name": "player_008", "score": 1980 },
+  { "player_name": "player_009", "score": 3700 },
+  { "player_name": "player_010", "score": 1600 }
 ])
 
 
 db.sprites.find().pretty()
 db.audio.find().pretty()
 db.scores.find().pretty()
+
+
+//db.sprites.drop()
+//db.audio.drop()
+//db.scores.drop()

@@ -1,42 +1,42 @@
 [
   {
-    "player_id": "player_001",
+    "player_name": "player_001",
     "score": 1500
   },
   {
-    "player_id": "player_002",
+    "player_name": "player_002",
     "score": 2450
   },
   {
-    "player_id": "player_003",
+    "player_name": "player_003",
     "score": 3200
   },
   {
-    "player_id": "player_001",
+    "player_name": "player_001",
     "score": 2100
   },
   {
-    "player_id": "player_004",
+    "player_name": "player_004",
     "score": 1200
   },
   {
-    "player_id": "player_002",
+    "player_name": "player_002",
     "score": 4000
   },
   {
-    "player_id": "player_005",
+    "player_name": "player_005",
     "score": 900
   },
   {
-    "player_id": "player_006",
+    "player_name": "player_006",
     "score": 1980
   },
   {
-    "player_id": "player_007",
+    "player_name": "player_007",
     "score": 3700
   },
   {
-    "player_id": "player_003",
+    "player_name": "player_003",
     "score": 1600
   }
 ]
