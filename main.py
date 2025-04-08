@@ -29,30 +29,65 @@ class PlayerScore(BaseModel):
 
     
 
-
 @app.post("/upload_sprite")
 async def upload_sprite(file: UploadFile = File(...)):
-    # In a real application, the file should be saved to a storage service 
-    content = await file.read()
-    sprite_doc = {"filename": file.filename, "content": content}
+    try:
+        if file.content_type != "image/png":
+            raise HTTPException(status_code=400, detail="Uploaded file is not an image")
+
+        contents = await file.read()
+        #Upload to GridFS
+        fileID = await fsSprites.upload_from_stream(
+            filename=file.filename,
+            source=contents
+        )
+
+        if(not fileID):
+            raise HTTPException(status_code=500, detail=str("Unable to Upload File"))
+           
+        return {
+            "message": "Sprite uploaded",
+            "sprite_id": str(fileID)
+        }
+    except HTTPException as httpE: #if an http exception is caught outpout it
+        raise httpE
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str("Unable to Upload File"))
 
 
-    result = await db.sprites.insert_one(sprite_doc)
+#Get Sprite
+@app.get("/spritefile/{sprite_id}")
+async def get_sprite_file(_id: str):
+    try:
+        fileID = ObjectId(_id) #Convert the audio_id to ObjectId
+        fileData = await db.sprites.files.find_one({"_id": fileID}) #Verify it exists in files
+        if not fileData:
+            raise HTTPException(status_code=404, detail="Sprite file not found")
+        gridfsResult = await fsSprites.open_download_stream(fileID) #Ref: https://www.mongodb.com/docs/drivers/node/v3.6/fundamentals/gridfs/
+        if not gridfsResult:
+            raise HTTPException(status_code=404, detail="Unable to open Sprite file")  
+        return StreamingResponse(gridfsResult, media_type="image/png") #Ref: https://fastapi.tiangolo.com/advanced/custom-response/#additional-documentation
+    
+    except HTTPException as httpE: #if an http exception is caught outpout it
+        raise httpE
+    except Exception:
+        raise HTTPException(status_code=404, detail="Sprite file not found")
 
+@app.get("/spritedata/{sprite_id}")
+async def get_sprite_data(_id: str):    
+    fileID = ObjectId(_id) #Convert the sprite_id to ObjectId
+    fileData = await db.sprites.files.find_one({"_id": fileID})
+    if not fileData:
+        raise HTTPException(status_code=404, detail="Sprite file not found")
 
-    return {"message": "Sprite uploaded", "id": str(result.inserted_id)}
-
-
-#Get Audio
-@app.get("/sprite/{sprite_id}")
-async def get_sprite(_id: str):
-    result = await db.sprites.find_one({"_id": ObjectId(_id)})
-
-    if result:
-        result["_id"] = str(result["_id"]) #Convert ObjectId to string
-        return result 
-    else:
-        raise HTTPException(status_code=404, detail="Sprite not found")
+    return {
+        "_id": str(fileData["_id"]), 
+        "filename": fileData["filename"],
+        "chunkSize": fileData["chunkSize"],
+        "length": fileData["length"],
+        "uploadDate": fileData["uploadDate"]
+    }   
     
 
 #Get All Sprites
@@ -74,23 +109,26 @@ async def get_all_sprites():
 @app.post("/upload_audio")
 async def upload_audio(file: UploadFile = File(...)):
     try:
-        contents = await file.read()
+        if file.content_type != "audio/mpeg":
+            raise HTTPException(status_code=400, detail="Uploaded file is not an image")
 
+        contents = await file.read()
         #Upload to GridFS
-        file_id = await fsAudio.upload_from_stream(
+        fileID = await fsAudio.upload_from_stream(
             filename=file.filename,
             source=contents
         )
 
-        if(not file_id):
+        if(not fileID):
             raise HTTPException(status_code=500, detail=str("Unable to Upload File"))
         
-
         return {
             "message": "Audio uploaded",
-            "metadata": audio_doc,
-            "metadata_id": str(result.inserted_id)
+            "sprite_id": str(fileID)
         }
+
+    except HTTPException as httpE: #if an http exception is caught outpout it
+        raise httpE
     except Exception as e:
         raise HTTPException(status_code=500, detail=str("Unable to Upload File"))
 
@@ -108,13 +146,25 @@ async def get_audio_file(_id: str):
             raise HTTPException(status_code=404, detail="Unable to open Audio file")  
         return StreamingResponse(gridfsResult, media_type="audio/mpeg") #Ref: https://fastapi.tiangolo.com/advanced/custom-response/#additional-documentation
 
+    except HTTPException as httpE: #if an http exception is caught outpout it
+        raise httpE
     except Exception:
         raise HTTPException(status_code=404, detail="Audio file not found")
 
 @app.get("/audiodata/{audio_id}")
 async def get_audio_data(_id: str):      
-    file_id = ObjectId(audio_id) #Convert the audio_id to ObjectId
-        
+    fileID = ObjectId(_id) #Convert the audio_id to ObjectId
+    fileData = await db.audio.files.find_one({"_id": fileID})
+    if not fileData:
+        raise HTTPException(status_code=404, detail="Audio file not found")
+
+    return {
+        "_id": str(fileData["_id"]), 
+        "filename": fileData["filename"],
+        "chunkSize": fileData["chunkSize"],
+        "length": fileData["length"],
+        "uploadDate": fileData["uploadDate"]
+    }   
     
 
 #Get All Audio
