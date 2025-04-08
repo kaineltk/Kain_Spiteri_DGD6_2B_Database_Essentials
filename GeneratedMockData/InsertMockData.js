@@ -1,31 +1,61 @@
 use DB_PlayerData
 
-
-db.sprites.insertMany([
-  { "filename": "hero_walk.png", "file_id": "gridfs1" },
-  { "filename": "enemy_fly.png", "file_id": "gridfs2" },
-  { "filename": "platform_tile.png", "file_id": "gridfs3" },
-  { "filename": "boss_roar.png", "file_id": "gridfs4" },
-  { "filename": "coin_spin.png", "file_id": "gridfs5" },
-  { "filename": "door_open.png", "file_id": "gridfs6" },
-  { "filename": "trap_spike.png", "file_id": "gridfs7" },
-  { "filename": "fireball_cast.png", "file_id": "gridfs8" },
-  { "filename": "shield_block.png", "file_id": "gridfs9" },
-  { "filename": "npc_villager.png", "file_id": "gridfs10" }
+// Mock GridFS files for sprites
+db.sprites.files.insertMany([
+  { _id: ObjectId("661000000000000000000001"), filename: "hero_walk.png", length: 20, chunkSize: 261120, uploadDate: new Date() },
+  { _id: ObjectId("661000000000000000000002"), filename: "enemy_fly.png", length: 18, chunkSize: 261120, uploadDate: new Date() },
+  { _id: ObjectId("661000000000000000000003"), filename: "platform_tile.png", length: 22, chunkSize: 261120, uploadDate: new Date() },
+  { _id: ObjectId("661000000000000000000004"), filename: "boss_roar.png", length: 25, chunkSize: 261120, uploadDate: new Date() },
+  { _id: ObjectId("661000000000000000000005"), filename: "coin_spin.png", length: 19, chunkSize: 261120, uploadDate: new Date() },
+  { _id: ObjectId("661000000000000000000006"), filename: "door_open.png", length: 21, chunkSize: 261120, uploadDate: new Date() },
+  { _id: ObjectId("661000000000000000000007"), filename: "trap_spike.png", length: 23, chunkSize: 261120, uploadDate: new Date() },
+  { _id: ObjectId("661000000000000000000008"), filename: "fireball_cast.png", length: 26, chunkSize: 261120, uploadDate: new Date() },
+  { _id: ObjectId("661000000000000000000009"), filename: "shield_block.png", length: 24, chunkSize: 261120, uploadDate: new Date() },
+  { _id: ObjectId("66100000000000000000000a"), filename: "npc_villager.png", length: 22, chunkSize: 261120, uploadDate: new Date() }
 ])
 
-db.audio.insertMany([
-  { "filename": "main_theme.mp3", "file_id": "gridfs11" },
-  { "filename": "battle_theme.mp3", "file_id": "gridfs12" },
-  { "filename": "victory_jingle.mp3", "file_id": "gridfs13" },
-  { "filename": "loss_theme.mp3", "file_id": "gridfs14" },
-  { "filename": "menu_click.wav", "file_id": "gridfs15" },
-  { "filename": "jump.wav", "file_id": "gridfs16" },
-  { "filename": "coin_collect.wav", "file_id": "gridfs17" },
-  { "filename": "door_open.wav", "file_id": "gridfs18" },
-  { "filename": "explosion.wav", "file_id": "gridfs19" },
-  { "filename": "ambient_forest.mp3", "file_id": "gridfs20" }
+// Corresponding chunks for each sprite (1 chunk per file for simplicity)
+db.sprites.chunks.insertMany([
+  { files_id: ObjectId("661000000000000000000001"), n: 0, data: BinData(0, "aGVybyB3YWxrIGRhdGE=") },
+  { files_id: ObjectId("661000000000000000000002"), n: 0, data: BinData(0, "ZW5lbXkgZmx5IGRhdGE=") },
+  { files_id: ObjectId("661000000000000000000003"), n: 0, data: BinData(0, "cGxhdGZvcm0gdGlsZSBkYXRh") },
+  { files_id: ObjectId("661000000000000000000004"), n: 0, data: BinData(0, "Ym9zcyByb2FyIGRhdGE=") },
+  { files_id: ObjectId("661000000000000000000005"), n: 0, data: BinData(0, "Y29pbiBzcGluIGRhdGE=") },
+  { files_id: ObjectId("661000000000000000000006"), n: 0, data: BinData(0, "ZG9vciBvcGVuIGRhdGE=") },
+  { files_id: ObjectId("661000000000000000000007"), n: 0, data: BinData(0, "dHJhcCBzcGlrZSBkYXRh") },
+  { files_id: ObjectId("661000000000000000000008"), n: 0, data: BinData(0, "ZmlyZWJhbGwgY2FzdCBkYXRh") },
+  { files_id: ObjectId("661000000000000000000009"), n: 0, data: BinData(0, "c2hpZWxkIGJsb2NrIGRhdGE=") },
+  { files_id: ObjectId("66100000000000000000000a"), n: 0, data: BinData(0, "bnBjIHZpbGxhZ2VyIGRhdGE=") }
 ])
+
+// Mock GridFS files for audio
+db.audio.files.insertMany([
+  { _id: ObjectId("66100000000000000000000b"), filename: "main_theme.mp3", length: 1234, chunkSize: 261120, uploadDate: new Date() },
+  { _id: ObjectId("66100000000000000000000c"), filename: "battle_theme.mp3", length: 1150, chunkSize: 261120, uploadDate: new Date() },
+  { _id: ObjectId("66100000000000000000000d"), filename: "victory_jingle.mp3", length: 980, chunkSize: 261120, uploadDate: new Date() },
+  { _id: ObjectId("66100000000000000000000e"), filename: "loss_theme.mp3", length: 1020, chunkSize: 261120, uploadDate: new Date() },
+  { _id: ObjectId("66100000000000000000000f"), filename: "menu_click.wav", length: 880, chunkSize: 261120, uploadDate: new Date() },
+  { _id: ObjectId("661000000000000000000010"), filename: "jump.wav", length: 640, chunkSize: 261120, uploadDate: new Date() },
+  { _id: ObjectId("661000000000000000000011"), filename: "coin_collect.wav", length: 740, chunkSize: 261120, uploadDate: new Date() },
+  { _id: ObjectId("661000000000000000000012"), filename: "door_open.wav", length: 710, chunkSize: 261120, uploadDate: new Date() },
+  { _id: ObjectId("661000000000000000000013"), filename: "explosion.wav", length: 910, chunkSize: 261120, uploadDate: new Date() },
+  { _id: ObjectId("661000000000000000000014"), filename: "ambient_forest.mp3", length: 1100, chunkSize: 261120, uploadDate: new Date() }
+])
+
+// Corresponding chunks for audio (1 chunk each for simplicity)
+db.audio.chunks.insertMany([
+  { files_id: ObjectId("66100000000000000000000b"), n: 0, data: BinData(0, "bWFpbiB0aGVtZSBhdWRpbyBkYXRh") },
+  { files_id: ObjectId("66100000000000000000000c"), n: 0, data: BinData(0, "YmF0dGxlIHRoZW1lIGF1ZGlvIGRhdGE=") },
+  { files_id: ObjectId("66100000000000000000000d"), n: 0, data: BinData(0, "dmljdG9yeSBqdW5nbGUgZGF0YQ==") },
+  { files_id: ObjectId("66100000000000000000000e"), n: 0, data: BinData(0, "bG9zcyB0aGVtZSBhdWRpbyBkYXRh") },
+  { files_id: ObjectId("66100000000000000000000f"), n: 0, data: BinData(0, "bWVudSBjbGljayBzb3VuZCBiZWVw") },
+  { files_id: ObjectId("661000000000000000000010"), n: 0, data: BinData(0, "anVtcCBzb3VuZCBhdWRpbw==") },
+  { files_id: ObjectId("661000000000000000000011"), n: 0, data: BinData(0, "Y29pbiBjb2xsZWN0IHNvdW5kIGJpcA==") },
+  { files_id: ObjectId("661000000000000000000012"), n: 0, data: BinData(0, "ZG9vciBvcGVuIGF1ZGlvIGRhdGE=") },
+  { files_id: ObjectId("661000000000000000000013"), n: 0, data: BinData(0, "ZXhwbG9zaW9uIHNvdW5kIGVmZmVjdA==") },
+  { files_id: ObjectId("661000000000000000000014"), n: 0, data: BinData(0, "Zm9yZXN0IGFtYmllbnQgdHJhY2s=") }
+])
+
 
 db.scores.insertMany([
   { "player_name": "player_001", "score": 1500 },
@@ -40,11 +70,14 @@ db.scores.insertMany([
   { "player_name": "player_010", "score": 1600 }
 ])
 
-
-db.sprites.find().pretty()
-db.audio.find().pretty()
+db.sprites.files.find().pretty()
+db.sprites.chunks.find().pretty()
+db.audio.files.find().pretty()
+db.audio.chunks.find().pretty()
 db.scores.find().pretty()
 
-//db.sprites.drop()
-//db.audio.drop()
+//db.audio.chunks.drop()
+//db.audio.files.drop()
+//db.sprites.chunks.drop()
+//db.sprites.files.drop()
 //db.scores.drop()

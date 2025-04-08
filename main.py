@@ -1,6 +1,7 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from pydantic import BaseModel
 from motor.motor_asyncio import AsyncIOMotorClient
+from motor.motor_asyncio import AsyncIOMotorGridFSBucket
 import os
 from dotenv import load_dotenv
 from bson import ObjectId
@@ -16,7 +17,10 @@ CONNECTION_STRING = os.getenv('CONNECTION_STRING')
 
 client = AsyncIOMotorClient(CONNECTION_STRING)
 db = client.DB_PlayerData  
-#fs = gridfs.GridFSBucket(db)  # Create GridFS instance for this database
+
+#Create gridfs buckets REF: https://motor.readthedocs.io/en/stable/api-asyncio/asyncio_gridfs.html
+fsSprites = AsyncIOMotorGridFSBucket(db,bucket_name="sprites")
+fsAudio = AsyncIOMotorGridFSBucket(db,bucket_name="audio")
 
 class PlayerScore(BaseModel):
     player_name: str
@@ -27,12 +31,15 @@ class PlayerScore(BaseModel):
 
 @app.post("/upload_sprite")
 async def upload_sprite(file: UploadFile = File(...)):
+    # In a real application, the file should be saved to a storage service 
+    content = await file.read()
+    sprite_doc = {"filename": file.filename, "content": content}
 
- # In a real application, the file should be saved to a storage service 
- content = await file.read()
- sprite_doc = {"filename": file.filename, "content": content}
- result = await db.sprites.insert_one(sprite_doc)
- return {"message": "Sprite uploaded", "id": str(result.inserted_id)}
+
+    result = await db.sprites.insert_one(sprite_doc)
+
+
+    return {"message": "Sprite uploaded", "id": str(result.inserted_id)}
 
 
 #Get Audio
@@ -50,45 +57,62 @@ async def get_sprite(_id: str):
 #Get All Sprites
 @app.get("/all_sprites")
 async def get_all_sprites():
-    savedSprites = await db.sprites.find().to_list(length=100)
+    savedSprites = await fsSprites.find().to_list(length=100)
     allSprites = []
 
     for sprite in savedSprites:
-        sprite["_id"] = str(sprite["_id"]) #Convert ObjectId to string
-        allSprites.append(audio)
+        allSprites.append({
+            "_id": str(sprite["_id"]),  #Convert ObjectId to string
+            "filename": sprite["filename"],
+            "length": sprite["length"],
+            "uploadDate": sprite["uploadDate"]
+        })
 
-    return {"all_audio": allSprites}
+    return {"all_sprites": allSprites}
 
-
-#TODO: THIS
 @app.post("/upload_audio")
 async def upload_audio(file: UploadFile = File(...)):
-    content = await file.read()
-    audio_doc = {"filename": file.filename, "content": content}
-    result = await db.audio.insert_one(audio_doc)
-    return {"message": "Audio file uploaded", "id": str(result.inserted_id)}
+    try:
+        contents = await file.read()
+
+        #Upload to GridFS
+        file_id = await fsAudio.upload_from_stream(
+            filename=file.filename,
+            source=contents
+        )
+
+        if(not file_id):
+            raise HTTPException(status_code=500, detail=str("Unable to Upload File"))
+        
+
+        return {
+            "message": "Audio uploaded",
+            "metadata": audio_doc,
+            "metadata_id": str(result.inserted_id)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str("Unable to Upload File"))
+
 
 #Get Audio
 @app.get("/audio/{audio_id}")
 async def get_audio(_id: str):
-    result = await db.audio.find_one({"_id": ObjectId(_id)})
-
-    if result:
-        result["_id"] = str(result["_id"]) #Convert ObjectId to string
-        return result 
-    else:
-        raise HTTPException(status_code=404, detail="Audio not found")
+   
     
 
 #Get All Audio
 @app.get("/all_audio")
 async def get_all_audio():
-    savedAudio = await db.audio.find().to_list(length=100)
+    savedAudio = await fsAudio.find().to_list(length=100)
     allAudio = []
 
     for audio in savedAudio:
-        audio["_id"] = str(audio["_id"]) #Convert ObjectId to string
-        allAudio.append(audio)
+        allAudio.append({
+            "_id": str(audio["_id"]),  #Convert ObjectId to string
+            "filename": audio["filename"],
+            "length": audio["length"],
+            "uploadDate": audio["uploadDate"]
+        })
 
     return {"all_audio": allAudio}
 
