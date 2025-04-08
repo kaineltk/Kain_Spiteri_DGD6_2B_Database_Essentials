@@ -1,4 +1,5 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from motor.motor_asyncio import AsyncIOMotorClient
 from motor.motor_asyncio import AsyncIOMotorGridFSBucket
@@ -95,9 +96,25 @@ async def upload_audio(file: UploadFile = File(...)):
 
 
 #Get Audio
-@app.get("/audio/{audio_id}")
-async def get_audio(_id: str):
-   
+@app.get("/audiofile/{audio_id}")
+async def get_audio_file(_id: str):      
+    try:
+        fileID = ObjectId(_id) #Convert the audio_id to ObjectId
+        fileData = await db.audio.files.find_one({"_id": fileID}) #Verify it exists in files
+        if not fileData:
+            raise HTTPException(status_code=404, detail="Audio file not found")
+        gridfsResult = await fsAudio.open_download_stream(fileID) #Ref: https://www.mongodb.com/docs/drivers/node/v3.6/fundamentals/gridfs/
+        if not gridfsResult:
+            raise HTTPException(status_code=404, detail="Unable to open Audio file")  
+        return StreamingResponse(gridfsResult, media_type="audio/mpeg") #Ref: https://fastapi.tiangolo.com/advanced/custom-response/#additional-documentation
+
+    except Exception:
+        raise HTTPException(status_code=404, detail="Audio file not found")
+
+@app.get("/audiodata/{audio_id}")
+async def get_audio_data(_id: str):      
+    file_id = ObjectId(audio_id) #Convert the audio_id to ObjectId
+        
     
 
 #Get All Audio
