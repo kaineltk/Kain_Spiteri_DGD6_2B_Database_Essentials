@@ -27,7 +27,9 @@ class PlayerScore(BaseModel):
     player_name: str
     score: int
 
-    
+@app.get("/")
+def read_root():
+    return {"message": "Vercel Online"}    
 
 @app.post("/upload_sprite")
 async def upload_sprite(file: UploadFile = File(...)):
