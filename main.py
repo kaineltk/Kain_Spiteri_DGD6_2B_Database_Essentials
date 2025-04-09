@@ -95,8 +95,6 @@ async def get_sprite_data(_id: str):
 #Get All Sprites
 @app.get("/all_sprites")
 async def get_all_sprites():
-    db = client.DB_PlayerData  
-
     savedSprites = await fsSprites.find().to_list(length=100)
     allSprites = []
 
@@ -217,6 +215,7 @@ async def get_score(player_name: str):
 
 @app.get("/all_scores")
 async def get_all_scores():
+    db = client.DB_PlayerData  
     savedScores = await db.scores.find().to_list(length=100)
     allScores = []
 
