@@ -65,7 +65,7 @@ async def upload_sprite(file: UploadFile = File(...)):
            
         return {
             "message": "Sprite uploaded",
-            "sprite_id": str(fileID)
+            "audio_id": str(fileID)
         }
     except HTTPException as httpE: #if an http exception is caught outpout it
         raise httpE
@@ -179,7 +179,7 @@ async def upload_audio(file: UploadFile = File(...)):
         
         return {
             "message": "Audio uploaded",
-            "sprite_id": str(fileID)
+            "audio_id": str(fileID)
         }
 
     except HTTPException as httpE: #if an http exception is caught outpout it

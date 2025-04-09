@@ -1,0 +1,26 @@
+[{
+  "_id": {
+    "$oid": "67f610984b65361ddd338900"
+  },
+  "filename": "CatSprite2.png",
+  "chunkSize": 261120,
+  "length": {
+    "$numberLong": "89397"
+  },
+  "uploadDate": {
+    "$date": "2025-04-09T06:15:54.071Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "67f613644fe636af2feef71a"
+  },
+  "filename": "CatSprite1.png",
+  "chunkSize": 261120,
+  "length": {
+    "$numberLong": "89593"
+  },
+  "uploadDate": {
+    "$date": "2025-04-09T06:27:50.021Z"
+  }
+}]

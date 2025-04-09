@@ -1,0 +1,26 @@
+[{
+  "_id": {
+    "$oid": "67f6148c4fe636af2feef720"
+  },
+  "filename": "FirstMockDataAudio.mp3",
+  "chunkSize": 261120,
+  "length": {
+    "$numberLong": "8829"
+  },
+  "uploadDate": {
+    "$date": "2025-04-09T06:32:46.487Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "67f614944fe636af2feef723"
+  },
+  "filename": "SecondMockDataAudio.mp3",
+  "chunkSize": 261120,
+  "length": {
+    "$numberLong": "8973"
+  },
+  "uploadDate": {
+    "$date": "2025-04-09T06:32:53.970Z"
+  }
+}]
