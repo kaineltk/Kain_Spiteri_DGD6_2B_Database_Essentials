@@ -50,6 +50,32 @@ def escapeInput(input_str: str): #This is an Option, but it is Discouraged to us
 def read_root():
     return {"message": "Vercel Online"}    
 
+#This deletes a sprite
+@app.delete("/delete_sprite/{sprite_id}")
+async def delete_sprite(sprite_id: str):
+    """
+    Deletes a sprite from the database by its ID.
+    """
+    if not checkWhitelist(sprite_id):
+        raise HTTPException(status_code=400, detail="Invalid character in input")
+
+    db = getDB()
+    fsSprites = getSpriteBucket(db)
+
+    try:
+        fileID = ObjectId(sprite_id)  #Convert the sprite_id to ObjectId
+        fileData = await db.sprites.files.find_one({"_id": fileID})  #Verify it exists in files
+        if not fileData:
+            raise HTTPException(status_code=404, detail="Sprite file not found")
+
+        # Delete the file from the GridFS bucket
+        await fsSprites.delete(fileID)
+        return {"message": f"Sprite with ID {sprite_id} deleted successfully"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting sprite: {str(e)}")
+
+
 #This uploads a sprite to the mongo dB it only allows sprites of type PNG 
 @app.post("/upload_sprite")
 async def upload_sprite(file: UploadFile = File(...)):
@@ -169,6 +195,32 @@ async def get_all_sprites():
         })
 
     return {"all_sprites": allSprites}
+
+#Delete Audio
+@app.delete("/delete_audio/{audio_id}")
+async def delete_audio(audio_id: str):
+    """
+    Deletes an audio file from the database by its ID.
+    """
+    if not checkWhitelist(audio_id):
+        raise HTTPException(status_code=400, detail="Invalid character in input")
+
+    db = getDB()
+    fsAudio = getAudioBucket(db)
+
+    try:
+        fileID = ObjectId(audio_id)  #Convert the audio_id to ObjectId
+        fileData = await db.audio.files.find_one({"_id": fileID})  #Verify it exists in files
+        if not fileData:
+            raise HTTPException(status_code=404, detail="Audio file not found")
+
+        # Delete the file from the GridFS bucket
+        await fsAudio.delete(fileID)
+        return {"message": f"Audio with ID {audio_id} deleted successfully"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting audio: {str(e)}")
+
 
 #Upload audio
 @app.post("/upload_audio")
@@ -290,6 +342,26 @@ async def get_all_audio():
 
     return {"all_audio": allAudio}
 
+#Delete Player Score
+@app.delete("/delete_player_score/{player_name}")
+async def delete_player_score(player_name: str):
+    """
+    Deletes a player score from the database by player name.
+    """
+    if not checkWhitelist(player_name):
+        raise HTTPException(status_code=400, detail="Invalid character in input")
+
+    db = getDB()
+
+    try:
+        result = await db.scores.delete_one({"player_name": player_name})
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Player score not found")
+        return {"message": f"Player score for {player_name} deleted successfully"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting player score: {str(e)}")
+
 
 #Add Player Score
 @app.post("/player_score")
@@ -352,3 +424,28 @@ async def get_all_scores():
         allScores.append(score)
 
     return {"all_scores": allScores}
+
+#Update player score
+@app.put("/update_player_score/{player_name}")
+async def update_player_score(player_name: str, new_score: int):
+    """
+    Updates the score of a player by their name.
+    """
+    if not checkWhitelist(player_name):
+        raise HTTPException(status_code=400, detail="Invalid character in input")
+
+    db = getDB()
+
+    try:
+        result = await db.scores.update_one(
+            {"player_name": player_name},  # Find the player by name
+            {"$set": {"score": new_score}}  # Update the score
+        )
+
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Player not found")
+        
+        return {"message": f"Score for {player_name} updated successfully", "new_score": new_score}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error updating player score: {str(e)}")
