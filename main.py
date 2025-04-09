@@ -7,6 +7,7 @@ import os
 from dotenv import load_dotenv
 from bson import ObjectId
 import gridfs
+import re
 
 # Load environment variables from .env file
 load_dotenv()
@@ -30,6 +31,19 @@ def getSpriteBucket(db):
 def getAudioBucket(db):
     return AsyncIOMotorGridFSBucket(db,bucket_name="audio")
 
+#SQL Injection Prevention
+def checkWhitelist(input_str: str): #White Listing REF: https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html#primary-defenses
+    forbiddenCharacters = ['$', '{', '}', ';', '<', '>', '!', '`', "'", '"']
+    #Loop through forbidden characters and search for them
+    for char in forbiddenCharacters: 
+        if char in input_str:
+            return False
+    return True #Return true if nothing found
+
+def escapeInput(input_str: str): #This is an Option, but it is Discouraged to use so it not being used
+    pattern = r"([\"'`;$.\\{}\[\]\(\)])"
+    return re.sub(pattern, r"\\\1", input_str)
+
 
 #This endpoint is here to test vercel's connection
 @app.get("/")
@@ -50,8 +64,8 @@ async def upload_sprite(file: UploadFile = File(...)):
     fsSprites = getSpriteBucket(db) 
 
     try:
-        if file.content_type != "image/png":
-            raise HTTPException(status_code=400, detail="Uploaded file is not an image")
+        if file.content_type not in ["image/png", "image/jpeg"]:
+            raise HTTPException(status_code=400, detail="Only .png and .jpeg are supported")
 
         contents = await file.read()
         #Upload to GridFS
@@ -84,6 +98,8 @@ async def get_sprite_file(_id: str):
     If the file exists it gets it from the GridFS bucket 
     A StreamingResponse is returned containing the file
     """
+    if not checkWhitelist(_id):
+        raise HTTPException(status_code=400, detail="Invalid character in input")   
 
     db = getDB()
     fsSprites = getSpriteBucket(db) 
@@ -111,6 +127,9 @@ async def get_sprite_data(_id: str):
     Searches through files DB to find a file with the matching ID
     If the file exists it returns the file data
     """
+    if not checkWhitelist(_id):
+        raise HTTPException(status_code=400, detail="Invalid character in input")  
+
     db = getDB()
 
     fileID = ObjectId(_id) #Convert the sprite_id to ObjectId
@@ -160,12 +179,15 @@ async def upload_audio(file: UploadFile = File(...)):
     Reads file content and uploads it to GridFS bucket
     IF successful returns the uploaded item ID, else an HTTP Exception 500 
     """
+    if not checkWhitelist(file.filename):
+        raise HTTPException(status_code=400, detail="Invalid character in input")  
+
     db = getDB()
     fsAudio = getAudioBucket(db)  
 
     try:
-        if file.content_type != "audio/mpeg":
-            raise HTTPException(status_code=400, detail="Uploaded file is not an audio file")
+        if file.content_type not in ["audio/mpeg", "audio/wav"]:
+            raise HTTPException(status_code=400, detail="Only mp3 and wav are supported")
 
         contents = await file.read() #Read File Contents
         #Upload to GridFS
@@ -198,6 +220,8 @@ async def get_audio_file(_id: str):
     If the file exists it gets it from the GridFS bucket 
     A StreamingResponse is returned containing the file
     """
+    if not checkWhitelist(_id):
+        raise HTTPException(status_code=400, detail="Invalid character in input")  
 
     db = getDB()
     fsAudio = getAudioBucket(db)     
@@ -224,6 +248,9 @@ async def get_audio_data(_id: str):
     Searches through files DB to find a file with the matching ID
     If the file exists it returns the file data
     """
+    if not checkWhitelist(_id):
+        raise HTTPException(status_code=400, detail="Invalid character in input")  
+
     db = getDB()     
     fileID = ObjectId(_id) #Convert the audio_id to ObjectId
     fileData = await db.audio.files.find_one({"_id": fileID})
@@ -272,6 +299,9 @@ async def add_score(score: PlayerScore):
     Creates a score dictionary 
     Adds the score to the score DB (player_name: str,score: int)
     """
+    if not checkWhitelist(score.player_name):
+        raise HTTPException(status_code=400, detail="Invalid character in input")  
+
 
     db = getDB()
     score_doc = score.dict()
@@ -293,6 +323,8 @@ async def get_score(player_name: str):
     Retrieves DB from MongoDB
     Searches the DB for a matching player_name and returns it
     """
+    if not checkWhitelist(player_name):
+        raise HTTPException(status_code=400, detail="Invalid character in input")  
 
     db = getDB()
     result = await db.scores.find_one({"player_name": player_name})

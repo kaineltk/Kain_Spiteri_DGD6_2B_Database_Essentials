@@ -13,7 +13,7 @@ db.scores.insertMany([
   { "player_name": "player_010", "score": 1600 }
 ])
 
-//INSERT AUDIO AND SCORES MANUALY FROM JSON FILES
+//INSERT AUDIO AND SCORES MANUALLY FROM JSON FILES
 
 db.sprites.files.find().pretty()
 db.sprites.chunks.find().pretty()
