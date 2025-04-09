@@ -13,19 +13,23 @@ load_dotenv()
 
 app = FastAPI()
 
-# Connect to Mongo Atlas
-CONNECTION_STRING = os.getenv('CONNECTION_STRING')
-
-client = AsyncIOMotorClient(CONNECTION_STRING)
-db = client.DB_PlayerData  
-
-#Create gridfs buckets REF: https://motor.readthedocs.io/en/stable/api-asyncio/asyncio_gridfs.html
-fsSprites = AsyncIOMotorGridFSBucket(db,bucket_name="sprites")
-fsAudio = AsyncIOMotorGridFSBucket(db,bucket_name="audio")
-
 class PlayerScore(BaseModel):
     player_name: str
     score: int
+
+def getDB():
+    # Connect to Mongo Atlas
+    CONNECTION_STRING = os.getenv('CONNECTION_STRING')
+    client = AsyncIOMotorClient(CONNECTION_STRING)
+    return client.DB_PlayerData  
+
+#Create gridfs buckets REF: https://motor.readthedocs.io/en/stable/api-asyncio/asyncio_gridfs.html
+def getSpriteBucket(db):
+    return AsyncIOMotorGridFSBucket(db,bucket_name="sprites")
+
+def getAudioBucket(db):
+    return AsyncIOMotorGridFSBucket(db,bucket_name="audio")
+
 
 @app.get("/")
 def read_root():
@@ -33,6 +37,9 @@ def read_root():
 
 @app.post("/upload_sprite")
 async def upload_sprite(file: UploadFile = File(...)):
+    db = getDB()
+    fsSprites = getSpriteBucket(db) 
+
     try:
         if file.content_type != "image/png":
             raise HTTPException(status_code=400, detail="Uploaded file is not an image")
@@ -61,6 +68,9 @@ async def upload_sprite(file: UploadFile = File(...)):
 #Get Sprite
 @app.get("/spritefile/{sprite_id}")
 async def get_sprite_file(_id: str):
+    db = getDB()
+    fsSprites = getSpriteBucket(db) 
+
     try:
         fileID = ObjectId(_id) #Convert the audio_id to ObjectId
         fileData = await db.sprites.files.find_one({"_id": fileID}) #Verify it exists in files
@@ -77,7 +87,9 @@ async def get_sprite_file(_id: str):
         raise HTTPException(status_code=404, detail="Sprite file not found")
 
 @app.get("/spritedata/{sprite_id}")
-async def get_sprite_data(_id: str):    
+async def get_sprite_data(_id: str):   
+    db = getDB()
+
     fileID = ObjectId(_id) #Convert the sprite_id to ObjectId
     fileData = await db.sprites.files.find_one({"_id": fileID})
     if not fileData:
@@ -95,6 +107,9 @@ async def get_sprite_data(_id: str):
 #Get All Sprites
 @app.get("/all_sprites")
 async def get_all_sprites():
+    db = getDB()
+    fsSprites = getSpriteBucket(db) 
+
     savedSprites = await fsSprites.find().to_list(length=100)
     allSprites = []
 
@@ -110,6 +125,9 @@ async def get_all_sprites():
 
 @app.post("/upload_audio")
 async def upload_audio(file: UploadFile = File(...)):
+    db = getDB()
+    fsAudio = getAudioBucket(db)  
+
     try:
         if file.content_type != "audio/mpeg":
             raise HTTPException(status_code=400, detail="Uploaded file is not an image")
@@ -137,7 +155,9 @@ async def upload_audio(file: UploadFile = File(...)):
 
 #Get Audio
 @app.get("/audiofile/{audio_id}")
-async def get_audio_file(_id: str):      
+async def get_audio_file(_id: str): 
+    db = getDB()
+    fsAudio = getAudioBucket(db)     
     try:
         fileID = ObjectId(_id) #Convert the audio_id to ObjectId
         fileData = await db.audio.files.find_one({"_id": fileID}) #Verify it exists in files
@@ -154,7 +174,8 @@ async def get_audio_file(_id: str):
         raise HTTPException(status_code=404, detail="Audio file not found")
 
 @app.get("/audiodata/{audio_id}")
-async def get_audio_data(_id: str):      
+async def get_audio_data(_id: str): 
+    db = getDB()     
     fileID = ObjectId(_id) #Convert the audio_id to ObjectId
     fileData = await db.audio.files.find_one({"_id": fileID})
     if not fileData:
@@ -172,6 +193,9 @@ async def get_audio_data(_id: str):
 #Get All Audio
 @app.get("/all_audio")
 async def get_all_audio():
+    db = getDB()
+    fsAudio = getAudioBucket(db)
+
     savedAudio = await fsAudio.find().to_list(length=100)
     allAudio = []
 
@@ -189,6 +213,7 @@ async def get_all_audio():
 #Add Player Score
 @app.post("/player_score")
 async def add_score(score: PlayerScore):
+    db = getDB()
     score_doc = score.dict()
 
     try:
@@ -204,6 +229,7 @@ async def add_score(score: PlayerScore):
 #Get Player Score
 @app.get("/player_score/{player_name}")
 async def get_score(player_name: str):
+    db = getDB()
     result = await db.scores.find_one({"player_name": player_name})
 
     if result:
@@ -215,7 +241,7 @@ async def get_score(player_name: str):
 
 @app.get("/all_scores")
 async def get_all_scores():
-    db = client.DB_PlayerData  
+    db = getDB()
     savedScores = await db.scores.find().to_list(length=100)
     allScores = []
 
